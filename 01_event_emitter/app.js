@@ -1,4 +1,5 @@
-const EventEmitter = require("events");
+// const EventEmitter = require("events"); // This node's events library
+const EventEmitter = require("./events");
 
 class Emitter extends EventEmitter {}
 
