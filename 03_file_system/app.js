@@ -1,7 +1,14 @@
 const fs = require("fs/promises");
 
+// commands
+const CREATE_FILE = "create a file";
+const DELETE_FILE = "delete the file";
+const RENAME_FILE = "rename the file";
+const ADD_TO_FILE = "add to the file";
+
 /* Watching the command.txt file for changes */
 (async () => {
+  // function for creating a file
   const createFile = async (path) => {
     try {
       // checking whether or not we already have the file
@@ -17,8 +24,25 @@ const fs = require("fs/promises");
     }
   };
 
-  // commands
-  const CREATE_FILE = "create a file";
+  const deleteFile = async (path) => {
+    console.log(`Deleting ${path}...`);
+    try {
+      await fs.unlink(path, (error) => {
+        if (error) throw error;
+      });
+    } catch (error) {
+      console.log(`Failed to delete file ${path}`, error);
+    }
+  };
+
+  const renameFile = (oldPath, newPath) => {
+    console.log(`Rename ${oldPath} to ${newPath}`);
+  };
+
+  const addToFile = (path, content) => {
+    console.log(`Adding to ${path}`);
+    console.log(`Content: ${content}`);
+  };
 
   const commandFileHandler = await fs.open("./command.txt", "r"); // a numeric file handler
 
@@ -38,11 +62,36 @@ const fs = require("fs/promises");
     await commandFileHandler.read(buff, offset, length, position);
     const command = buff.toString("utf-8");
 
-    // create a file
+    // create a file;
     // create a file <path>
     if (command.includes(CREATE_FILE)) {
       const filePath = command.substring(CREATE_FILE.length + 1);
       await createFile(filePath);
+    }
+
+    // rename file:
+    // rename the file <path> to <new-path>
+    if (command.includes(RENAME_FILE)) {
+      const separator = " to ";
+      const sepIdx = command.indexOf(separator);
+      const oldFilePath = command.substring(RENAME_FILE.length + 1, sepIdx);
+      const newFilePath = command.substring(sepIdx + separator.length);
+    }
+
+    // delete file:
+    // delete the file <path>
+    if (command.includes(DELETE_FILE)) {
+      const filePath = command.substring(DELETE_FILE.length + 1);
+      await deleteFile(filePath);
+    }
+
+    // add to file:
+    // add to the file <path> this content: <content>
+    if (command.includes(ADD_TO_FILE)) {
+      const separator = " this content: ";
+      const sepIdx = command.indexOf(separator);
+      const filePath = command.substring(ADD_TO_FILE.length + 1, sepIdx);
+      const content = command.substring(sepIdx + separator.length);
     }
   });
 
