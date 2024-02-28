@@ -2,6 +2,24 @@ const fs = require("fs/promises");
 
 /* Watching the command.txt file for changes */
 (async () => {
+  const createFile = async (path) => {
+    try {
+      // checking whether or not we already have the file
+      const existingFileHandle = await fs.open(path, "r");
+      existingFileHandle.close();
+      // we already have the file
+      return console.log(`The file ${path} already exists.`);
+    } catch (error) {
+      // If we don't have the file, now we should create one
+      const newFileHandle = await fs.open(path, "w");
+      console.log("A new file was successfully created.");
+      newFileHandle.close();
+    }
+  };
+
+  // commands
+  const CREATE_FILE = "create a file";
+
   const commandFileHandler = await fs.open("./command.txt", "r"); // a numeric file handler
 
   commandFileHandler.on("change", async () => {
@@ -17,13 +35,15 @@ const fs = require("fs/promises");
     const position = 0;
 
     // we always want to read the whole content (from the begining all the way to the end)
-    const content = await commandFileHandler.read(
-      buff,
-      offset,
-      length,
-      position
-    );
-    console.log(content);
+    await commandFileHandler.read(buff, offset, length, position);
+    const command = buff.toString("utf-8");
+
+    // create a file
+    // create a file <path>
+    if (command.includes(CREATE_FILE)) {
+      const filePath = command.substring(CREATE_FILE.length + 1);
+      await createFile(filePath);
+    }
   });
 
   const watcher = fs.watch("./command.txt");
@@ -35,4 +55,6 @@ const fs = require("fs/promises");
       commandFileHandler.emit("change");
     }
   }
+
+  commandFileHandler.close();
 })();
