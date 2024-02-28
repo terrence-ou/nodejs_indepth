@@ -24,6 +24,7 @@ const ADD_TO_FILE = "add to the file";
     }
   };
 
+  // function for deleting a file
   const deleteFile = async (path) => {
     console.log(`Deleting ${path}...`);
     try {
@@ -35,7 +36,15 @@ const ADD_TO_FILE = "add to the file";
     }
   };
 
-  const renameFile = (oldPath, newPath) => {
+  // function for renaming a file
+  const renameFile = async (oldPath, newPath) => {
+    try {
+      await fs.rename(oldPath, newPath, (error) => {
+        if (error) throw error;
+      });
+    } catch (error) {
+      console.log(`Failed to rename the file: `, error);
+    }
     console.log(`Rename ${oldPath} to ${newPath}`);
   };
 
@@ -76,6 +85,7 @@ const ADD_TO_FILE = "add to the file";
       const sepIdx = command.indexOf(separator);
       const oldFilePath = command.substring(RENAME_FILE.length + 1, sepIdx);
       const newFilePath = command.substring(sepIdx + separator.length);
+      renameFile(oldFilePath, newFilePath);
     }
 
     // delete file:
@@ -100,7 +110,7 @@ const ADD_TO_FILE = "add to the file";
   for await (const event of watcher) {
     // detecting the file chenge
     if (event.eventType === "change") {
-      console.log(event); //{eventType: "...", filename: "..."}
+      // console.log(event); //{eventType: "...", filename: "..."}
       commandFileHandler.emit("change");
     }
   }
