@@ -41,16 +41,29 @@ const ADD_TO_FILE = "add to the file";
     try {
       await fs.rename(oldPath, newPath, (error) => {
         if (error) throw error;
+        console.log(`Rename ${oldPath} to ${newPath}`);
       });
     } catch (error) {
       console.log(`Failed to rename the file: `, error);
     }
-    console.log(`Rename ${oldPath} to ${newPath}`);
   };
 
-  const addToFile = (path, content) => {
-    console.log(`Adding to ${path}`);
-    console.log(`Content: ${content}`);
+  const addToFile = async (path, content) => {
+    // check if the give path exists, and create the file if it is not.
+    try {
+      const fileHandler = await fs.open(path, "r");
+      fileHandler.close();
+    } catch (error) {
+      createFile(path);
+    }
+
+    try {
+      console.log(`Adding to ${path}`);
+      console.log(`Content: ${content}`);
+      await fs.appendFile(path, content);
+    } catch (error) {
+      console.log(`Failed to add content to the file: `, error);
+    }
   };
 
   const commandFileHandler = await fs.open("./command.txt", "r"); // a numeric file handler
@@ -75,7 +88,7 @@ const ADD_TO_FILE = "add to the file";
     // create a file <path>
     if (command.includes(CREATE_FILE)) {
       const filePath = command.substring(CREATE_FILE.length + 1);
-      await createFile(filePath);
+      createFile(filePath);
     }
 
     // rename file:
@@ -92,7 +105,7 @@ const ADD_TO_FILE = "add to the file";
     // delete the file <path>
     if (command.includes(DELETE_FILE)) {
       const filePath = command.substring(DELETE_FILE.length + 1);
-      await deleteFile(filePath);
+      deleteFile(filePath);
     }
 
     // add to file:
@@ -102,6 +115,7 @@ const ADD_TO_FILE = "add to the file";
       const sepIdx = command.indexOf(separator);
       const filePath = command.substring(ADD_TO_FILE.length + 1, sepIdx);
       const content = command.substring(sepIdx + separator.length);
+      addToFile(filePath, content);
     }
   });
 

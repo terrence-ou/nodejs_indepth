@@ -1,1 +1,1 @@
-rename the file test.txt to d.txt
+add to the file test.txt this content: Some test contents
